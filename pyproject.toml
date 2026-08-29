@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "avir"
+version = "1.0.0"
+description = "AVIR analysis framework"
+readme = "README.MD"
+requires-python = ">=3.12"
+dependencies = [
+  "pandas==3.0.0",
+  "docker==7.1.0",
+]
+
+[project.optional-dependencies]
+docs = [
+  "Sphinx==9.1.0",
+  "sphinx-rtd-theme==3.1.0",
+]
+
+[tool.setuptools]
+py-modules = [
+  "config",
+  "extract",
+  "ir_statistic",
+  "name_mapping",
+  "saber_analyze",
+  "semantic_statistic",
+  "source_statistic",
+  "utils",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["framework*", "wrapper*"]

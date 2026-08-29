@@ -1,0 +1,426 @@
+Baidu Apollo 6.0 for AVIR framework
+====================================
+
+**Github**: |apollo601_wllvm|
+
+.. |apollo601_wllvm| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/tree/r6.0.1_wllvm"
+      target="_blank" rel="noopener noreferrer">
+     https://github.com/avirstatic/apollo/tree/r6.0.1_wllvm
+   </a>
+
+**Commit HEAD**: ``004a3591fa2487514356a99cc9fd86a5e758e80a``
+
+**Version**: 6.0.1
+
+**Original (modified from)**: |apollo601_original|
+
+.. |apollo601_original| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/tree/r6.0.1"
+      target="_blank" rel="noopener noreferrer">
+     https://github.com/avirstatic/apollo/tree/r6.0.1
+   </a>
+
+**Core modification method**: |git_compare_601|
+
+.. |git_compare_601| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/compare/r6.0.1%E2%80%A6r6.0.1_wllvm"
+      target="_blank" rel="noopener noreferrer">
+     Github Compare Link
+   </a>
+
+- |lru_cache_h|
+
+.. |lru_cache_h| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/modules/common/util/lru_cache.h"
+      target="_blank" rel="noopener noreferrer">
+     modules/common/util/lru_cache.h
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-6
+
+   @@ -193,7 +193,7 @@ class LRUCache {
+     private:
+         static constexpr size_t kDefaultCapacity = 10;
+
+   -     const size_t capacity_;
+   +     size_t capacity_;
+         size_t size_;
+         std::map<K, Node<K, V>> map_;
+         Node<K, V> head_;
+
+- |object_h|
+
+.. |object_h| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/modules/perception/base/object.h"
+      target="_blank" rel="noopener noreferrer">
+     modules/perception/base/object.h
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-6
+
+   @@ -31,7 +31,7 @@ namespace apollo {
+     namespace perception {
+     namespace base {
+
+   - struct alignas(16) Object {
+   + struct alignas(32) Object {
+         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+         Object();
+
+- |object_supplement_h|
+
+.. |object_supplement_h| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/modules/perception/base/object_supplement.h"
+      target="_blank" rel="noopener noreferrer">
+     modules/perception/base/object_supplement.h
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-6, 14-15, 23-24, 32-33, 41-42, 50-51
+
+   @@ -30,7 +30,7 @@ namespace apollo {
+     namespace perception {
+     namespace base {
+    
+   - struct alignas(16) LidarObjectSupplement {
+   + struct alignas(32) LidarObjectSupplement {
+         void Reset() {
+             is_orientation_ready = false;
+             on_use = false;
+   @@ -74,7 +74,7 @@ typedef std::shared_ptr<LidarObjectSupplement> LidarObjectSupplementPtr;
+     typedef std::shared_ptr<const LidarObjectSupplement>
+         LidarObjectSupplementConstPtr;
+    
+   - struct alignas(16) RadarObjectSupplement {
+   + struct alignas(32) RadarObjectSupplement {
+         void Reset() {
+             on_use = false;
+             range = 0.0f;
+   @@ -100,7 +100,7 @@ typedef std::shared_ptr<RadarObjectSupplement> RadarObjectSupplementPtr;
+     typedef std::shared_ptr<const RadarObjectSupplement>
+         RadarObjectSupplementConstPtr;
+     
+   - struct alignas(16) CameraObjectSupplement {
+   + struct alignas(32) CameraObjectSupplement {
+         CameraObjectSupplement() { Reset(); }
+    
+         void Reset() {
+   @@ -185,7 +185,7 @@ typedef std::shared_ptr<const CameraObjectSupplement>
+         CameraObjectSupplementConstPtr;
+    
+     typedef Eigen::Matrix4f MotionType;
+   - struct alignas(16) VehicleStatus {
+   + struct alignas(32) VehicleStatus {
+         float roll_rate = 0;
+         float pitch_rate = 0;
+         float yaw_rate = 0;
+   @@ -202,7 +202,7 @@ typedef boost::circular_buffer<VehicleStatus> MotionBuffer;
+     typedef std::shared_ptr<MotionBuffer> MotionBufferPtr;
+     typedef std::shared_ptr<const MotionBuffer> MotionBufferConstPtr;
+    
+   - struct alignas(16) Vehicle3DStatus {
+   + struct alignas(32) Vehicle3DStatus {
+         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
+         float yaw_delta;  // azimuth angle change
+   @@ -245,7 +245,7 @@ struct SensorObjectMeasurement {
+         BBox2D<float> box;
+     };
+    
+   - struct alignas(16) FusionObjectSupplement {
+   + struct alignas(32) FusionObjectSupplement {
+         FusionObjectSupplement() { measurements.reserve(5); }
+         void Reset() {
+             on_use = false;
+
+- |trj_BUILD|
+
+.. |trj_BUILD| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/modules/planning/open_space/coarse_trajectory_generator/BUILD"
+      target="_blank" rel="noopener noreferrer">
+     modules/planning/open_space/coarse_trajectory_generator/BUILD
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-7, 15-17, 25-33
+
+   @@ -51,7 +51,8 @@ cc_library(
+
+     cc_library(
+         name = "open_space_utils",
+   -     copts = PLANNING_COPTS,
+   +     copts = PLANNING_COPTS + ["-fopenmp"],
+   +     linkopts = ["-lgomp", "-fopenmp"],
+         deps = [
+             "//modules/planning/open_space/coarse_trajectory_generator:grid_search",
+             "//modules/planning/open_space/coarse_trajectory_generator:node3d",
+   @@ -63,7 +64,8 @@ cc_library(
+         name = "hybrid_a_star",
+         srcs = ["hybrid_a_star.cc"],
+         hdrs = ["hybrid_a_star.h"],
+   -     copts = PLANNING_COPTS,
+   +     copts = PLANNING_COPTS + ["-fopenmp"],
+   +     linkopts = ["-lgomp", "-fopenmp"],
+         deps = [
+             ":open_space_utils",
+             "//cyber/common:log",
+   @@ -94,7 +96,14 @@ cc_test(
+         name = "node3d_test",
+         size = "small",
+         srcs = ["node3d_test.cc"],
+   -     linkopts = ["-lgomp"],
+   +     copts = [
+   +         "-DMODULE_NAME=\\\"planning\\\"",
+   +         "-fopenmp",
+   +     ],
+   +     linkopts = [
+   +         "-lgomp",
+   +         "-fopenmp",
+   +     ],
+         deps = [
+             ":open_space_utils",
+             "//cyber/common:log",
+
+- |v2x_object_h|
+
+.. |v2x_object_h| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/modules/v2x/fusion/libs/common/v2x_object.h"
+      target="_blank" rel="noopener noreferrer">
+     modules/v2x/fusion/libs/common/v2x_object.h
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-6, 14-15
+
+
+   @@ -123,7 +123,7 @@ class Info3d : public Info<Eigen::Vector3d, Eigen::Matrix3d> {
+         double height() const { return value_(2); }
+     };
+
+   - struct alignas(16) Object {
+   + struct alignas(32) Object {
+         typedef Info<bool, float> Infob;
+         typedef Info<float, float> Infof;
+         typedef Info<double, double> Infod;
+   @@ -221,7 +221,7 @@ struct alignas(16) Object {
+     typedef std::shared_ptr<Object> ObjectPtr;
+     typedef std::shared_ptr<const Object> ObjectConstPtr;
+
+   - struct alignas(16) ObjectList {
+   + struct alignas(32) ObjectList {
+         ObjectList() = default;
+         ~ObjectList() = default;
+         ObjectList(const ObjectList &) = default;
+
+- |bazel_rc|
+
+.. |bazel_rc| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/tools/bazel.rc"
+      target="_blank" rel="noopener noreferrer">
+     tools/bazel.rc
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 5-6, 12-30, 38-39, 47-76
+
+   @@ -26,18 +26,25 @@ build --show_timestamps
+     build --spawn_strategy=standalone
+  
+     # Enable colorful output of GCC
+   - build --cxxopt="-fdiagnostics-color=always"
+   + # build --cxxopt="-fdiagnostics-color=always"        # This line is a feature of GCC compiler, clang doesn't need
+
+     # Do not show warnings from external dependencies.
+     # build --output_filter="^//"
+
+     build --per_file_copt=external/upb/.*@-Wno-sign-compare
+   - build --copt="-Werror=sign-compare"
+   - build --per_file_copt=^modules/.*\.cc,^cyber/.*\.cc,@"-Werror=return-type"
+   - build --copt="-Werror=unused-variable"
+   - build --copt="-Werror=unused-but-set-variable"
+   - build --copt="-Werror=switch"
+   - build --cxxopt="-Werror=reorder"
+   + # build --copt="-Werror=sign-compare"                # treat sign-compare warning as an error, should be commented out
+   + # build --copt="-Werror=return-type"                 # treat return-type warning as an error, should be commented out
+   + # build --copt="-Werror=unused-variable"             # treat unused-variable as an error, should be commented out
+   + # build --copt="-Werror=unused-but-set-variable"     # treat unused-but-set-variable as an error, should be commented out
+   + # build --copt="-Werror=switch"                      # treat switch warning as an error, should be commented out
+   + # build --cxxopt="-Werror=reorder"                   # treat reorder warning as an error, should be commented out
+   +
+   + # Enable AVX2 support
+   + build --copt=-mavx2
+   + build --cxxopt=-mavx2
+   +
+   + build --copt=-mno-sse3                               # disables the SSE3 (Streaming SIMD Extensions 3) instruction set for c compiler
+   + build --crosstool_top=//tools/wllvm:toolchain        # points to a cc-toolchain defined in the wllvm toolset
+
+     # Default paths for SYSTEM LIBRARIES
+     build --define=PREFIX=/usr
+   @@ -49,7 +56,7 @@ build --define=INCLUDEDIR=$(PREFIX)/include
+     build:dbg -c dbg
+     build:opt -c opt
+
+   - build --config=optimize
+   + build --config=dbg
+     # Instruction set optimizations
+     build:optimize --copt=-march=native
+     build:optimize --host_copt=-march=native
+   @@ -121,3 +128,33 @@ coverage --test_tag_filters=-cpplint
+     # | Python Configurations                                      |
+     # +------------------------------------------------------------+
+     # Python support was configured by third_party/py .
+   +
+   + # Force using wllvm
+   + build --incompatible_enable_cc_toolchain_resolution
+   + build --action_env=CC=/apollo/tools/wllvm/CC
+   + build --action_env=CXX=/apollo/tools/wllvm/CXX
+   +
+   + # Disable problematic compiler flags
+   + build --copt=-Wno-unknown-warning-option
+   + build --copt=-Wno-unused-command-line-argument
+   + build --cxxopt=-Wno-write-strings
+   + build --cxxopt=-fpermissive
+   +
+   + # Ignore warnings for problematic flags
+   + build --copt=-Wno-error
+   + build --cxxopt=-Wno-error
+   +
+   + # OpenMP support
+   + build --copt=-fopenmp
+   + build --cxxopt=-fopenmp
+   + build --linkopt=-fopenmp
+   + build --linkopt=-lomp
+   +
+   + # Basic compilation flags
+   + build --copt=-fPIC
+   + build --cxxopt=-fPIC
+   +
+   + # Linker configuration
+   + build --linkopt=-fuse-ld=gold
+   + build --linkopt=-Wl,--no-as-needed
+   + build --linkopt=-Wl,--allow-multiple-definition
+
+- |tools_BUILD|
+
+.. |tools_BUILD| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/tools/wllvm/BUILD"
+      target="_blank" rel="noopener noreferrer">
+     tools/wllvm/BUILD
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 2-51
+
+   @@ -0,0 +1,50 @@
+   +
+   + load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
+   +
+   + package(default_visibility = ["//visibility:public"])
+   +
+   + filegroup(
+   +    name = "empty",
+   +    srcs = [],
+   + )
+   +
+   + filegroup(
+   +    name = "wllvm_wrapper",
+   +    srcs = [
+   +       "CC",
+   +       "CXX",
+   +    ],
+   + )
+   +
+   + filegroup(
+   +    name = "compiler_files",
+   +    srcs = [
+   +       ":wllvm_wrapper",
+   +       "@local_config_cc//:compiler_deps",
+   +    ],
+   + )
+   +
+   + cc_toolchain_suite(
+   +    name = "toolchain",
+   +    toolchains = {
+   +       "k8": ":cc-compiler-clang",
+   +       "k8|clang": ":cc-compiler-clang",
+   +       "k8|compiler": ":cc-compiler-clang",
+   +       "local": ":cc-compiler-clang",
+   +       "local|clang": ":cc-compiler-clang",
+   +       "local|compiler": ":cc-compiler-clang",
+   +    },
+   + )
+
+   + cc_toolchain(
+   +    name = "cc-compiler-clang",
+   +    all_files = ":compiler_files",
+   +    compiler_files = ":compiler_files",
+   +    dwp_files = ":empty",
+   +    linker_files = ":compiler_files",
+   +    objcopy_files = ":empty",
+   +    strip_files = ":empty",
+   +    supports_param_files = 0,
+   +    toolchain_identifier = "local-clang",
+   +    toolchain_config = "@local_config_cc//:local",
+   + )
+
+- |wllvm_CC|
+
+.. |wllvm_CC| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/tools/wllvm/CC"
+      target="_blank" rel="noopener noreferrer">
+     tools/wllvm/CC
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 2-11
+
+   @@ -0,0 +1,10 @@
+   + #!/bin/bash
+   + 
+   + export PATH=/usr/local/cuda-11.1/bin:/apollo/scripts:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+   + export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+   + export LLVM_COMPILER=clang
+   + export WLLVM_BC_STORE=/apollo/wllvm_bc
+   + export LLVM_BITCODE_GENERATION_FLAGS="-flto -fwhole-program-vtables"
+   + export THE_USER=$(whoami)
+   + 
+   + exec /home/$THE_USER/.local/bin/wllvm "$@"
+
+- |wllvm_CXX|
+
+.. |wllvm_CXX| raw:: html
+
+   <a href="https://github.com/avirstatic/apollo/blob/r6.0.1_wllvm/tools/wllvm/CXX"
+      target="_blank" rel="noopener noreferrer">
+     tools/wllvm/CXX
+   </a>
+
+.. code-block:: diff
+   :emphasize-lines: 2-11
+
+   @@ -0,0 +1,10 @@
+   + #!/bin/bash
+   + 
+   + export PATH=/usr/local/cuda-11.1/bin:/apollo/scripts:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+   + export LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
+   + export LLVM_COMPILER=clang
+   + export WLLVM_BC_STORE=/apollo/wllvm_bc
+   + export LLVM_BITCODE_GENERATION_FLAGS="-flto -fwhole-program-vtables"
+   + export THE_USER=$(whoami)
+   + 
+   + exec /home/$THE_USER/.local/bin/wllvm++ "$@"

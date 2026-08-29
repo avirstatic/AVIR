@@ -1,0 +1,5 @@
+# Python == 3.12 third-party dependencies for this project.
+pandas==3.0.0
+Sphinx==9.1.0
+sphinx-rtd-theme==3.1.0
+docker==7.1.0
