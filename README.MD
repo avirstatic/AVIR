@@ -1,5 +1,10 @@
 # AVIR
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22011115.svg)](https://doi.org/10.5281/zenodo.22011115)
+[![Documentation Status](https://app.readthedocs.org/projects/avir/badge/?version=latest)](https://avir.readthedocs.io/en/latest/)
+[![GitHub release](https://img.shields.io/github/v/release/avirstatic/AVIR)](https://github.com/avirstatic/AVIR/releases)
+
 ## Overview
 
 **AVIR** is a static program analysis and understanding framework for industrial-scale autonomous driving systems (ADSs), Baidu Apollo. It centrally manages the ADS source code of four Apollo versions (6.0-9.0) and, through lightweight modifications to the Bazel toolchain, redirects the build process to an LLVM-based [[2](#ref2)] wllvm wrapper so that the ADSs’ intermediate representation (IR) can be automatically collected without disrupting the original build workflow.
